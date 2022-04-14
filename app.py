@@ -1,12 +1,17 @@
 import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
+from flask_restful import Resource, Api, reqparse
 import pickle
 
 
 app= Flask(__name__, template_folder="templates")
-model = pickle.load(open('model.pkl', 'rb'))
+# Definición API Flask
+api = Api(app)
 
+
+model = pickle.load(open('model.pkl', 'rb'))
+items = []
 @app.route("/")
 def home():
     return render_template('index.html')
@@ -25,5 +30,12 @@ def predict():
             temp=j
     return render_template('index.html', id='predict', prediction_text='${}'.format(temp))
 
+class ItemList(Resource):
+    def get(self):
+        item = {'name': 'hola', 'price':10}
+        items.append(item)
+        return {'items': items},200
+
+api.add_resource(ItemList, '/api/items')
 if __name__ == '__main__':
     app.run()
