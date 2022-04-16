@@ -4,26 +4,34 @@ from flask import Flask, request, jsonify, render_template
 from flask_restful import   Api,Resource,reqparse
 import pickle
 
+class Modelo:
+    
+    def __init__(self):
+        self.price1=0
+        self.price2=0
+
 class CarPrediction(Resource):
     def post(self):
+        global model
+        #data= request.get_json()
         parser = reqparse.RequestParser()
-        parser.add_argument('price1',
-            type=float,
+        parser.add_argument('batch', 
+            type=dict, 
             required=True,
-            help="This field cannot be left blank!"
-        )
-        parser.add_argument('price2',
-            type=float,
-            required=True,
-            help="This field cannot be left blank!"
-        )
+            help="This field cannot be left blank!",
+            action='append')
         data = parser.parse_args()
-        item = {'name': 'Hola', 'price':10}
-        items.append(item)
-        return {'items': items},200
-
-
-
+        column_names=['R&DSpend','Administration','MarketingSpend','State']
+        final_features=[]
+        for item in data['batch']:
+            fila_features=[]
+            for col in column_names:
+                fila= dict(item)
+                fila_features.append(fila[col])
+            final_features.append(np.array(fila_features))
+        df=pd.DataFrame(final_features,columns=column_names)
+        predictions= model.predict(df)
+        return {'predictions': np.ravel(predictions).tolist()}
 
 
 app= Flask(__name__, template_folder="templates")
@@ -53,7 +61,7 @@ def predict():
             temp=j
     return render_template('index.html', id='predict', prediction_text='${}'.format(temp))
 
-
+ 
 @app.route('/api/doc',methods=['GET'])
 def api_documentation():
      return render_template('documentation.html')
