@@ -18,7 +18,16 @@ var spec = {
     "openapi": "3.0.1",
     "info": {
       "version": "1.0.0",
-      "title": "Datatouille API Specification"
+      "title": "Datatouille API Specification",
+      "contact":{
+        "name": "DataTouille API",
+        "url": "https://carprediction.azurewebsites.net",
+        "email": "datatouille@gmail.com"
+      }
+    },
+    "servers": {
+     
+      
     },
     "paths": {
       "/api/car-prediction": {
@@ -43,7 +52,7 @@ var spec = {
               "content": {
                 "application/json": {
                   "schema": {
-                    "$ref": "#/components/schemas/Article"
+                    "$ref": "#/components/schemas/PredictionResult"
                   }
                 }
               }
@@ -184,28 +193,68 @@ var spec = {
             }
           }
         },
+
         "CarPrediction": {
-         
           "required": [
-            "price1",
-            "price2"
-            
+            "batch"
           ],
           "properties": {
             
-            "price1": {
-              "description": "Price1",
-              "type": "float",
-              "example": 10.00
-            },
-            "price2": {
-              "description": "Price2",
-              "type": "float",
-              "example": 11.00
+            "batch": {
+              "description": "Batch to predict",
+              "type": "array",
+              "items" : {
+                "$ref": "#/components/schemas/ItemForBatch"
+              }
             }
           }
         },
-
+        "ItemForBatch": {
+          "type": "object",
+          "required": [
+            "R&DSpend",
+            "Administration"
+          ],
+          "properties": {
+            "R&DSpend": {
+              "description": "R&DSpend",
+              "type": "float",
+              "example": 0.01
+            },
+            "Administration": {
+              "description": "Administration",
+              "type": "float",
+              "example": 0.01
+            },
+            "MarketingSpend": {
+              "description": "Administration",
+              "type": "float",
+              "example": 0.01
+            },
+            "State": {
+              "description": "State",
+              "type": "str",
+              "example": 'Florida'
+            }
+          }
+        },
+        "PredictionResult": {
+          "required": [
+            "predictions"
+          ],
+          "properties": {
+            
+            "predictions": {
+              "description": "Results of the batch prediction",
+              "type": "array",
+              "items" : {
+                "type": "number",
+                "example": 100.32
+              }
+            }
+          }
+        },
+       
         "ArticleList": {
           "type": "array",
           "items": {
