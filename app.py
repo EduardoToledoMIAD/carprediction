@@ -12,7 +12,7 @@ class CarPredictionSchema(Schema):
     Administration = fields.Float(required=True)
     MarketingSpend = fields.Float(required=True)
     State = fields.Str(required=True)
-    
+
 class BatchSchema(Schema):
     batch = fields.List(fields.Nested(CarPredictionSchema))
 
@@ -24,7 +24,7 @@ class CarPrediction(Resource):
             result =BatchSchema().load(data)
         except ValidationError as err:
             print(err.messages)
-            return {err.messages}, 400
+            return err.messages, 400
     
         df = pd.DataFrame(result['batch'])
         df.rename(columns = {'RDSpend':'R&DSpend'}, inplace = True)
