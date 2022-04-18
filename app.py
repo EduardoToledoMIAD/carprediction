@@ -1,35 +1,34 @@
+
 import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
 from flask_restful import   Api,Resource,reqparse
+from marshmallow import Schema, fields, validate, ValidationError
 import pickle
 
-class Modelo:
+
+class CarPredictionSchema(Schema):
+    RDSpend = fields.Float(required=True)
+    Administration = fields.Float(required=True)
+    MarketingSpend = fields.Float(required=True)
+    State = fields.Str(required=True)
     
-    def __init__(self):
-        self.price1=0
-        self.price2=0
+class BatchSchema(Schema):
+    batch = fields.List(fields.Nested(CarPredictionSchema))
 
 class CarPrediction(Resource):
     def post(self):
         global model
-        #data= request.get_json()
-        parser = reqparse.RequestParser()
-        parser.add_argument('batch', 
-            type=dict, 
-            required=True,
-            help="This field cannot be left blank!",
-            action='append')
-        data = parser.parse_args()
+        data= request.get_json()
+        try:
+            result =BatchSchema().load(data)
+        except ValidationError as err:
+            print(err.messages)
+            return {err.messages}, 400
+    
+        df = pd.DataFrame(result['batch'])
+        df.rename(columns = {'RDSpend':'R&DSpend'}, inplace = True)
         column_names=['R&DSpend','Administration','MarketingSpend','State']
-        final_features=[]
-        for item in data['batch']:
-            fila_features=[]
-            for col in column_names:
-                fila= dict(item)
-                fila_features.append(fila[col])
-            final_features.append(np.array(fila_features))
-        df=pd.DataFrame(final_features,columns=column_names)
         predictions= model.predict(df)
         return {'predictions': np.ravel(predictions).tolist()}
 
