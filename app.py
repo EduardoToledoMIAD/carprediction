@@ -5,16 +5,12 @@ from flask import Flask, request, jsonify, render_template
 from flask_restful import   Api,Resource,reqparse
 from marshmallow import Schema, fields, validate, ValidationError
 import pickle
+import models
+from models.schemas import BatchSchema 
 
 
-class CarPredictionSchema(Schema):
-    RDSpend = fields.Float(required=True)
-    Administration = fields.Float(required=True)
-    MarketingSpend = fields.Float(required=True)
-    State = fields.Str(required=True)
 
-class BatchSchema(Schema):
-    batch = fields.List(fields.Nested(CarPredictionSchema))
+
 
 class CarPrediction(Resource):
     def post(self):
@@ -40,7 +36,7 @@ api = Api(app)
 
 
 model = pickle.load(open('model.pkl', 'rb'))
-items = []
+
 
 @app.route("/")
 def home():
