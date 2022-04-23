@@ -69,137 +69,17 @@ var spec = {
       },
      
       "/articles/{id}": {
-        "get": {
-          "summary": "Get an article.",
-          "operationId": "getArticle",
-          "tags": [
-            "Article API"
-          ],
-          "parameters": [
-            {
-              "$ref": "#/components/parameters/Id"
-            }
-          ],
-          "responses": {
-            "200": {
-              "description": "Success",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Article"
-                  }
-                }
-              }
-            },
-            "404": {
-              "$ref": "#/components/responses/NotFound"
-            }
-          }
-        },
-        "put": {
-          "summary": "Update",
-          "operationId": "updateArticle",
-          "tags": [
-            "Article API"
-          ],
-          "parameters": [
-            {
-              "$ref": "#/components/parameters/Id"
-            }
-          ],
-          "requestBody": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/Article"
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Success",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/components/schemas/Article"
-                  }
-                }
-              }
-            },
-            "404": {
-              "$ref": "#/components/responses/NotFound"
-            }
-          }
-        },
-        "delete": {
-          "summary": "Delete an article.",
-          "operationId": "deleteArticle",
-          "tags": [
-            "Article API"
-          ],
-          "parameters": [
-            {
-              "$ref": "#/components/parameters/Id"
-            }
-          ],
-          "responses": {
-            "204": {
-              "description": "Success"
-            },
-            "404": {
-              "$ref": "#/components/responses/NotFound"
-            }
-          }
-        }
+        
+        
       }
     },
     "components": {
       "schemas": {
-        "Id": {
-          "description": "Resource ID",
-          "type": "integer",
-          "format": "int64",
-          "readOnly": true,
-          "example": 1
-        },
-        "ArticleForList": {
-          "properties": {
-            "id": {
-              "$ref": "#/components/schemas/Id"
-            },
-            "category": {
-              "description": "Category of an article",
-              "type": "string",
-              "example": "sports"
-            }
-          }
-        },
-        "Article": {
-          "allOf": [
-            {
-              "$ref": "#/components/schemas/ArticleForList"
-            }
-          ],
-          "required": [
-            "text"
-          ],
-          "properties": {
-            "text": {
-              "description": "Content of an article",
-              "type": "string",
-              "maxLength": 1024,
-              "example": "# Title\n\n## Head Line\n\nBody"
-            }
-          }
-        },
-
         "CarPrediction": {
           "required": [
             "batch"
           ],
           "properties": {
-            
             "batch": {
               "description": "Batch to predict",
               "type": "array",
@@ -212,29 +92,37 @@ var spec = {
         "ItemForBatch": {
           "type": "object",
           "required": [
-            "RDSpend",
-            "Administration"
+            "Year",
+            "Administration",
+            "State",
+            "Make",
+            "Model"
           ],
           "properties": {
-            "RDSpend": {
-              "description": "R&DSpend",
-              "type": "float",
-              "example": 0.01
+            "Year": {
+              "description": "Year",
+              "type": "integer",
+              "example": 2017
             },
-            "Administration": {
+            "Mileage": {
               "description": "Administration",
-              "type": "float",
-              "example": 0.01
-            },
-            "MarketingSpend": {
-              "description": "Administration",
-              "type": "float",
-              "example": 0.01
+              "type": "integer",
+              "example": 15466
             },
             "State": {
               "description": "State",
               "type": "str",
-              "example": 'Florida'
+              "example": "FL"
+            },
+            "Make": {
+              "description": "Make",
+              "type": "str",
+              "example": 'Jeep'
+            },
+            "Model": {
+              "description": "Model",
+              "type": "str",
+              "example": 'Ranger'
             }
           }
         },
@@ -255,12 +143,6 @@ var spec = {
           }
         },
        
-        "ArticleList": {
-          "type": "array",
-          "items": {
-            "$ref": "#/components/schemas/ArticleForList"
-          }
-        },
         "Error": {
           "description": "<table>\n  <tr>\n    <th>Code</th>\n    <th>Description</th>\n  </tr>\n  <tr>\n    <td>illegal_input</td>\n    <td>The input is invalid.</td>\n  </tr>\n  <tr>\n    <td>not_found</td>\n    <td>The resource is not found.</td>\n  </tr>\n</table>\n",
           "required": [
