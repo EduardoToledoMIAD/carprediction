@@ -28,7 +28,7 @@ class CarPrediction(Resource):
         df = pd.DataFrame(json)
         df= encoder.transform(df)
         return df
-    def put(self):
+    def post(self):
         global model_extra
         data= request.get_json()
         try:
@@ -45,7 +45,7 @@ class CarPrediction(Resource):
             traceback.print_exc()
             return traceback.print_exc(),500
        
-    def post(self):
+    def xxx(self):
         global model
         data= request.get_json()
         try:
