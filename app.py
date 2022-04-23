@@ -1,4 +1,5 @@
 
+from base64 import encode
 import numpy as np
 import pandas as pd
 from flask import Flask, request, jsonify, render_template
@@ -6,18 +7,49 @@ from flask_restful import   Api,Resource,reqparse
 from marshmallow import Schema, fields, validate, ValidationError
 import pickle
 import models
-from models.schemas import BatchSchema 
+from models.schemas import BatchSchema, Batch1Schema
+import category_encoders as ce
+import joblib
+import traceback
+
 
 
 
 
 
 class CarPrediction(Resource):
+    def _features_selection(self, df:pd.DataFrame):
+        features=['Year', 'Mileage', 'Make_3', 'Model_2', 'Model_1', 'Make_5', 'Model_6', 'Model_7', 'Model_8', 'State_4', 'Make_2', 'Model_3', 'Model_4', 'Model_5']
+        df= df[features]
+        return df
+
+    def _encoder(self, json):
+        global encoder
+        df = pd.DataFrame(json)
+        df= encoder.transform(df)
+        return df
+    def put(self):
+        global model_extra
+        data= request.get_json()
+        try:
+            result =BatchSchema().load(data)
+            df=self._encoder(result['batch'])
+            df= self._features_selection(df)
+            predictions= model_extra.predict(df)
+            return {'predictions': np.ravel(predictions).tolist()},200
+          
+        except ValidationError as err:
+            print(err.messages)
+            return err.messages, 400
+        except Exception as e:
+            traceback.print_exc()
+            return traceback.print_exc(),500
+       
     def post(self):
         global model
         data= request.get_json()
         try:
-            result =BatchSchema().load(data)
+            result =Batch1Schema().load(data)
         except ValidationError as err:
             print(err.messages)
             return err.messages, 400
@@ -26,7 +58,7 @@ class CarPrediction(Resource):
         df.rename(columns = {'RDSpend':'R&DSpend'}, inplace = True)
         column_names=['R&DSpend','Administration','MarketingSpend','State']
         predictions= model.predict(df)
-        return {'predictions': np.ravel(predictions).tolist()}
+        return {'predictions': np.ravel(predictions).tolist()},200
 
 
 app= Flask(__name__, template_folder="templates")
@@ -36,7 +68,8 @@ api = Api(app)
 
 
 model = pickle.load(open('model.pkl', 'rb'))
-
+model_extra = joblib.load('model_extra.pkl')
+encoder =  joblib.load('binary_encoder.pkl')
 
 @app.route("/")
 def home():
