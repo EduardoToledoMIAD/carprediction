@@ -12,11 +12,6 @@ import category_encoders as ce
 import joblib
 import traceback
 
-
-
-
-
-
 class CarPrediction(Resource):
     def _features_selection(self, df:pd.DataFrame):
         features=['Year', 'Mileage', 'Make', 'Model', 'State']
@@ -52,8 +47,6 @@ app= Flask(__name__, template_folder="templates")
 
 api = Api(app)
 
-
-#model = pickle.load(open('model.pkl', 'rb'))
 model = joblib.load('model.pkl')
 encoder =  joblib.load('catboost_encoder.pkl')
 
