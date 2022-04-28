@@ -19,7 +19,7 @@ import traceback
 
 class CarPrediction(Resource):
     def _features_selection(self, df:pd.DataFrame):
-        features=['Year', 'Mileage', 'Make_3', 'Model_2', 'Model_1', 'Make_5', 'Model_6', 'Model_7', 'Model_8', 'State_4', 'Make_2', 'Model_3', 'Model_4', 'Model_5']
+        features=['Year', 'Mileage', 'Make', 'Model', 'State']
         df= df[features]
         return df
 
@@ -28,14 +28,15 @@ class CarPrediction(Resource):
         df = pd.DataFrame(json)
         df= encoder.transform(df)
         return df
+    
     def post(self):
-        global model_extra
+        global model
         data= request.get_json()
         try:
             result =BatchSchema().load(data)
             df=self._encoder(result['batch'])
             df= self._features_selection(df)
-            predictions= model_extra.predict(df)
+            predictions= model.predict(df)
             return {'predictions': np.ravel(predictions).tolist()},200
           
         except ValidationError as err:
@@ -45,31 +46,16 @@ class CarPrediction(Resource):
             traceback.print_exc()
             return traceback.print_exc(),500
        
-    def xxx(self):
-        global model
-        data= request.get_json()
-        try:
-            result =Batch1Schema().load(data)
-        except ValidationError as err:
-            print(err.messages)
-            return err.messages, 400
     
-        df = pd.DataFrame(result['batch'])
-        df.rename(columns = {'RDSpend':'R&DSpend'}, inplace = True)
-        column_names=['R&DSpend','Administration','MarketingSpend','State']
-        predictions= model.predict(df)
-        return {'predictions': np.ravel(predictions).tolist()},200
-
-
 app= Flask(__name__, template_folder="templates")
 # Definición API Flask
 
 api = Api(app)
 
 
-model = pickle.load(open('model.pkl', 'rb'))
-model_extra = joblib.load('model_extra.pkl')
-encoder =  joblib.load('binary_encoder.pkl')
+#model = pickle.load(open('model.pkl', 'rb'))
+model = joblib.load('model.pkl')
+encoder =  joblib.load('catboost_encoder.pkl')
 
 @app.route("/")
 def home():
@@ -77,17 +63,25 @@ def home():
 
 @app.route('/predict',methods=['POST'])
 def predict():
-    features = [x for x in request.form.values()]
-    print(features)
-    final_features = [np.array(features)]
-    column_names=['R&DSpend','Administration','MarketingSpend','State']
-    final_features=pd.DataFrame(final_features,columns=column_names)
-    prediction= model.predict(final_features)
-    temp=0.0
-    for i in prediction:
-        for j in i:
-            temp=j
-    return render_template('index.html', id='predict', prediction_text='${}'.format(temp))
+    global model
+    global encoder
+    
+    try:
+        features = [x for x in request.form.values()]
+        print(features)
+        final_features = [np.array(features)]
+        column_names=['Year','Mileage','Make','Model','State']
+        df=pd.DataFrame(final_features,columns=column_names)
+        df= encoder.transform(df)
+        selected_features=['Year', 'Mileage', 'Make', 'Model', 'State']
+        df= df[selected_features]
+        prediction= list(model.predict(df))
+        temp=0.0
+        for i in prediction:
+            temp=i
+        return render_template('index.html', id='predict', prediction_text='${}'.format(temp))
+    except Exception as e:
+        return render_template('index.html', id='predict', prediction_text='${}'.format("EXECUTION ERROR "))        
 
  
 @app.route('/api/doc',methods=['GET'])
