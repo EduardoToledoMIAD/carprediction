@@ -7,7 +7,7 @@ from flask_restful import   Api,Resource,reqparse
 from marshmallow import Schema, fields, validate, ValidationError
 import pickle
 import models
-from models.schemas import BatchSchema, Batch1Schema
+from models.schemas import BatchSchema
 import category_encoders as ce
 import joblib
 import traceback
